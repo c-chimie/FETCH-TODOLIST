@@ -36,7 +36,7 @@ const Home = () => {
 console.log("todo", todo)
 
 
-var raw = JSON.stringify([todo]);
+var raw = JSON.stringify(todo);
 
 var requestOptions = {
   method: 'PUT',
@@ -84,7 +84,8 @@ fetch("https://assets.breatheco.de/apis/fake/todos/user/concetta", requestOption
   function ClearAllTasksAndUser() {
     //DELETE to remove user and all contents
     //Only then would you have to POST again after
-    //Not working as intended though...
+    setTasks([]);
+    
     var raw = "";
 
     var requestOptions = {
@@ -97,7 +98,6 @@ fetch("https://assets.breatheco.de/apis/fake/todos/user/concetta", requestOption
       .then(response => response.json())
       .then(data => console.log(data))
       .catch(error => console.log('error', error));
-    setTasks(data);
   }
 
   // when the form is submitted, this is what happens (a task is added)
@@ -114,15 +114,21 @@ fetch("https://assets.breatheco.de/apis/fake/todos/user/concetta", requestOption
 
       setInput(""); // make the input box appear empty again after the user submits
       console.log("task", tasks)
-      // putTasks(tasks); //Calling the function that PUT is in
+      putTasks(tasks); //Calling the function that PUT is in
     }
   };
 
   // delete tasks
-  const deleteTask = (id) => {
-    let filteredTasks = [...tasks].filter((tasks) => tasks.label !== id);
-    setTasks(filteredTasks);
+  const deleteTask = (label) => {
+    let filteredTasks = tasks.filter((myTodo) => {
+      console.log("label", label)
+      // console.log("tasks.indexOf(myTodo)", tasks.indexOf(myTodo))
+      return myTodo.label != label
+    });
     
+    setTasks(filteredTasks);
+    console.log("filteredTasks", filteredTasks)
+    console.log("tasks", tasks)
     var raw = JSON.stringify(filteredTasks);
     
     var requestOptions = {
@@ -137,7 +143,6 @@ fetch("https://assets.breatheco.de/apis/fake/todos/user/concetta", requestOption
     fetch("https://assets.breatheco.de/apis/fake/todos/user/concetta", requestOptions)
       .then(response => response.json())
       .then(data => {console.log("deleteTask data", data)
-        setTasks(data)
       })
       .catch(error => console.log('error', error));
   };
@@ -145,9 +150,7 @@ fetch("https://assets.breatheco.de/apis/fake/todos/user/concetta", requestOption
   useEffect(() => {getTasks()}, []);
 
   return (
-    <div>
-      <button onClick={getTasks}>Get Tasks</button>
-      <button onClick={ClearAllTasksAndUser}>Clear All</button>
+    <div className="container">
       <h1 className="todos">todos</h1>
       <div className="list-card">
         <form onSubmit={addTask}>
@@ -162,7 +165,9 @@ fetch("https://assets.breatheco.de/apis/fake/todos/user/concetta", requestOption
 
         {/* use .map to display submitted text inputs */}
         <div className="list-item">
-          {tasks.map((task) => (
+          {tasks.map((task) => {
+            console.log("task", task)
+            return (
             <div className="todo" key={task.label}>
               <p>
                 {task.label}
@@ -171,13 +176,14 @@ fetch("https://assets.breatheco.de/apis/fake/todos/user/concetta", requestOption
                 </button>
               </p>
             </div>
-          ))}
+          )})}
           <p className="counter">
             {" "}
             {tasks.length === 1 ? "1 task left" : `${tasks.length} tasks left`}
           </p>
         </div>
       </div>
+      <button className="clear-button" onClick={ClearAllTasksAndUser}>Clear All</button>
     </div>
   );
 };
